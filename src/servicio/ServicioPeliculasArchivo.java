@@ -2,9 +2,7 @@ package servicio;
 
 import dominio.Pelicula;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.PrintWriter;
+import java.io.*;
 
 public class ServicioPeliculasArchivo implements IServicioPeliculas {
 
@@ -29,16 +27,77 @@ public class ServicioPeliculasArchivo implements IServicioPeliculas {
 
     @Override
     public void listarPeliculas() {
+        //Volvemos a abrir el archivo
+        var archivo = new File(NOMBRE_ARCHIVO);
+        try{
+            System.out.println("Listado de Peliculas");
+            //Abrimos el archivo para lectura
+            var entrada = new BufferedReader(new FileReader(archivo));
+            //Leemos linea a linea el archivo
+            String linea;
+            linea = entrada.readLine();
+            //leemos todas las lineas
+            while (linea !=null){
+                var pelicula = new Pelicula(linea);
+                System.out.println(pelicula);
+                //Antes de terminar el ciclo volvemos a leer la siguiene linea
+                linea = entrada.readLine();
+            }
+            //Cerrar el archivo
+            entrada.close();
+        }catch (Exception e){
+            System.out.println("Ocurrio un error al leer el archivo" + e.getMessage());
+        }
+
 
     }
 
     @Override
     public void agregarPelivula(Pelicula pelicula) {
+        boolean anexar = false;
+        var archivo = new File(NOMBRE_ARCHIVO);
+        try {
+            //Revisamos si existe el archivo
+            anexar = archivo.exists();
+            var salida = new PrintWriter(new FileWriter(archivo, anexar));
+            //Agregamos la pelicula(toString)
+            salida.println(pelicula);
+            salida.close();
+            System.out.println("Se agrego el archivo: " + pelicula);
 
+        }catch (Exception e){
+            System.out.println("Ocurrio un error al agregar pelicula " + e.getMessage());
+        }
     }
 
     @Override
     public void buscarPelicula(Pelicula pelicula) {
-
+        var archivo = new File(NOMBRE_ARCHIVO);
+        try {
+            //Abrimos el archivo para lectura linea a linea
+            var entrada = new BufferedReader(new FileReader(archivo));
+            String lineaTexto = entrada.readLine();
+            var indice = 1;
+            var encotrada = false;
+            var peliculaBuscar = pelicula.getNombre();
+            while (lineaTexto != null){
+                //Buscamos sin importar mayusculas/minusculas
+                if(peliculaBuscar !=null && peliculaBuscar.equalsIgnoreCase(lineaTexto)){
+                    encotrada = true;
+                    break;
+                }
+                //Leemos la siguient linea antes de la siguiente iteracion
+                lineaTexto = entrada.readLine();
+                indice++;
+            }//fin del while
+            //Imprimimos los resultados de la busqueda
+            if(encotrada)
+                System.out.println("Pelicula " + lineaTexto + " encontrada - linea " + indice);
+            else
+                System.out.println("No se encontro la pelicula " + pelicula.getNombre());
+            entrada.close();
+        }catch (Exception e){
+            System.out.println("Ocurrio un error al buscar en el archivo: " + e.getMessage());
+        }
     }
 }
